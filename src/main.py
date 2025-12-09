@@ -139,23 +139,28 @@ def run_geotechnical_analysis(input_excel_path: str):
     # -----------------------------------------------------------------------------
     # E. DATAFRAME EXPORT
     # -----------------------------------------------------------------------------
-
+    
     # Export results (charts + structural check) to a single Excel file
     export_multiple_dataframes(
         df_1=df_capacity_table,
-        df_2=df_footing_results
+        df_2=df_footing_results,
+        output_dir=output_filename, # Aquí se usará el valor 'output'
+        excel_filename=output_filename # Usar el nombre del archivo, ej: 'Results.xlsx'
     )
     print(f"💾 Tables exported to '{output_filename}.xlsx'.")
 
     # -----------------------------------------------------------------------------
     # F. PLOTTING AND EXPORT
     # -----------------------------------------------------------------------------
-
     # 1. Generate figures
     dictionary_of_figures = generate_capacity_charts(df_capacity_table)
 
     # 2. Export figures
-    export_charts_to_excel(dictionary_of_figures, chart_dir, chart_filename)
+    export_charts_to_excel(
+        figures_dict=dictionary_of_figures, 
+        output_dir=chart_dir, 
+        excel_filename=chart_filename
+    )
     print(f"💾 Charts exported to '{chart_filename}'.")
     
     print("\n✨ Workflow completed successfully. ✨")

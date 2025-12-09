@@ -235,36 +235,37 @@ def export_charts_to_excel(figures_dict, output_dir, excel_filename):
         output_dir (str): The destination folder path (e.g., 'output').
         excel_filename (str): The name of the Excel file (e.g., 'Results.xlsx').
     """
+    # Construye la ruta completa: "output/NombreDelArchivo.xlsx"
     excel_path = os.path.join(output_dir, excel_filename)
 
     try:
-        # 1. Load the existing Excel file using openpyxl (it must exist for this function to run)
+        # 1. Cargar el archivo Excel existente.
+        # Esto fallará si la función de exportación de datos no ha creado el archivo primero.
         workbook_excel = load_workbook(excel_path)
 
         for sheet_name, figure in figures_dict.items():
-            # 2. Get the sheet or create it if it doesn't exist
+            # 2. Obtener la hoja si existe, o crearla
             if sheet_name in workbook_excel.sheetnames:
                 excel_sheet = workbook_excel[sheet_name]
             else:
-                # Create the sheet
                 excel_sheet = workbook_excel.create_sheet(sheet_name) 
 
-            # 3. Create an in-memory buffer and save the Matplotlib figure
+            # 3. Crear buffer en memoria para la imagen
             buffer = io.BytesIO()
             figure.savefig(buffer, format='png', bbox_inches='tight')
             buffer.seek(0)
-            plt.close(figure) # Close the Matplotlib figure to free memory
+            plt.close(figure) # Cierra la figura para liberar recursos
             
-            # 4. Create an Openpyxl Image object and add it to the sheet
+            # 4. Insertar la imagen en la hoja
             img = Image(buffer)
             excel_sheet.add_image(img, 'A1')
 
-        # 5. Save the workbook one single time, respecting the full path
+        # 5. Guardar el archivo una única vez al final, usando la ruta completa
         workbook_excel.save(excel_path)
         print(f"✅ Charts successfully exported to '{excel_path}'")
 
     except FileNotFoundError:
-        # This occurs if the data export function (the one that creates the file) hasn't run yet.
+        # Mensaje de error clave para la depuración
         print(f"❌ Error: The file '{excel_path}' was not found. Ensure data export has created the file first.")
         return 
     except Exception as e:
