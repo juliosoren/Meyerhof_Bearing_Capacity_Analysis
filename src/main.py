@@ -35,8 +35,21 @@ from plotting import (
     generate_capacity_charts
 )
 
+
 # =================================================================================
-# 2. MAIN ORCHESTRATION FUNCTION
+# 2. CI/CD FIX: ENSURE OUTPUT DIRECTORY EXISTS
+# =================================================================================
+
+OUTPUT_DIR = 'output'
+
+# This ensures that the 'output' folder is created if it does not exist,
+# preventing the CI error when attempting to save results.
+if not os.path.exists(OUTPUT_DIR):
+    os.makedirs(OUTPUT_DIR)
+    
+
+# =================================================================================
+# 3. MAIN ORCHESTRATION FUNCTION
 # =================================================================================
 
 def run_geotechnical_analysis(input_excel_path: str):
@@ -149,7 +162,7 @@ def run_geotechnical_analysis(input_excel_path: str):
 
 
 # =================================================================================
-# 3. ENTRY POINT (Command-line argument handling)
+# 4. ENTRY POINT (Command-line argument handling)
 # =================================================================================
 
 if __name__ == "__main__":
