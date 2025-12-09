@@ -25,7 +25,7 @@ SHEET_NAME_1 = "Capacity_Charts"
 SHEET_TITLE_1 = "Surface Bearing Capacity Results"
 SHEET_NAME_2 = "settlement_check"
 SHEET_TITLE_2 = "Settlement Check Results"
-OUTPUT_DIR = os.getcwd()
+OUTPUT_DIR = "output"
 
 "==================================================================================================="
 
