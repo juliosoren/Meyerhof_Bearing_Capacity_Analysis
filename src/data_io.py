@@ -273,38 +273,45 @@ def export_charts_to_excel(figures_dict, output_dir, excel_filename):
         
 "==================================================================================================="
 
-def export_multiple_dataframes(df_1, df_2):
+
+def export_multiple_dataframes(df_1, df_2, output_dir, excel_filename, 
+                               sheet_name_1, sheet_title_1, 
+                               sheet_name_2, sheet_title_2):
     """
     Exports two DataFrames (df_1 and df_2) to two separate sheets in a single Excel file, 
     applying predefined custom formatting to both.
 
-    It uses global variables (OUTPUT_DIR, OUTPUT_FILENAME, SHEET_NAME_1, etc.) 
-    for paths and sheet names.
-    
     Args:
         df_1 (pd.DataFrame): The first DataFrame to export (e.g., capacity results).
         df_2 (pd.DataFrame): The second DataFrame to export (e.g., settlement check results).
+        output_dir (str): The destination folder path (e.g., 'output'). <--- ¡NUEVO!
+        excel_filename (str): The base name of the Excel file (e.g., 'Results'). <--- ¡NUEVO!
+        sheet_name_1 (str): Name for the first sheet. <--- ¡NUEVO!
+        sheet_title_1 (str): Title for the first sheet. <--- ¡NUEVO!
+        sheet_name_2 (str): Name for the second sheet. <--- ¡NUEVO!
+        sheet_title_2 (str): Title for the second sheet. <--- ¡NUEVO!
     """
-    # Use the global OUTPUT_DIR (carpeta_destino)
-    if not os.path.exists(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)
+    
+    # 1. Crear el directorio si no existe (usando el argumento output_dir)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
-    # Use the global OUTPUT_FILENAME (nombre_archivo)
-    excel_path = os.path.join(OUTPUT_DIR, f"{OUTPUT_FILENAME}.xlsx")
+    # 2. Construir la ruta completa
+    excel_path = os.path.join(output_dir, f"{excel_filename}.xlsx")
 
     try:
         # Write both DataFrames to their respective sheets
         with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
-            # Use global SHEET_NAME_1 (nombre_hoja_1)
-            df_1.to_excel(writer, sheet_name=SHEET_NAME_1, startrow=3, index=False, header=False)
-            # Use global SHEET_NAME_2 (nombre_hoja_2)
-            df_2.to_excel(writer, sheet_name=SHEET_NAME_2, startrow=3, index=False, header=False)
+            df_1.to_excel(writer, sheet_name=sheet_name_1, startrow=3, index=False, header=False)
+            df_2.to_excel(writer, sheet_name=sheet_name_2, startrow=3, index=False, header=False)
 
+        # Cargar el libro de trabajo para aplicar el formato
         wb = load_workbook(excel_path)
 
         # Internal function to apply all formatting logic to a specific sheet
-        def apply_format(ws, df, title):
-            # Get max rows and columns
+        def apply_format(ws, df, title, sheet_name): # Añadimos sheet_name como argumento
+            # NOTA: ws = wb[sheet_name] ya está implícito en la lógica de abajo
+            
             last_column = ws.max_column
             last_row = ws.max_row
             end_letter = get_column_letter(last_column)
@@ -340,9 +347,9 @@ def export_multiple_dataframes(df_1, df_2):
                     if isinstance(cell.value, (int, float)):
                         cell.number_format = "0.00"
 
-        # Apply formatting to both sheets (using global titles)
-        apply_format(wb[SHEET_NAME_1], df_1, SHEET_TITLE_1)
-        apply_format(wb[SHEET_NAME_2], df_2, SHEET_TITLE_2)
+        # Apply formatting to both sheets (using arguments instead of global variables)
+        apply_format(wb[sheet_name_1], df_1, sheet_title_1, sheet_name_1)
+        apply_format(wb[sheet_name_2], df_2, sheet_title_2, sheet_name_2)
 
         wb.save(excel_path)
         wb.close()
