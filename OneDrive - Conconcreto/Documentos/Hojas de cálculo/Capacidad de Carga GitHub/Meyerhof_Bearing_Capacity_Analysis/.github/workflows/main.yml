@@ -1,0 +1,58 @@
+# .github/workflows/main.yml
+
+name: CI - Bearing Capacity Test
+
+# 1. WHEN TO RUN THIS WORKFLOW
+on:
+  # Run on every push (code upload)
+  push:
+    branches: [ main ]
+  # Run on every Pull Request
+  pull_request:
+    branches: [ main ]
+
+# 2. JOB DEFINITION
+jobs:
+  build:
+    # Execute on a Linux environment (Ubuntu)
+    runs-on: ubuntu-latest
+    
+    # 3. EXECUTION STEPS
+    steps:
+      # Download repository code
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # Set up the Python environment (using a recent stable version)
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+          
+      # Install project dependencies
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4. RUN FUNCTIONAL TEST
+      # Executes the main script using the example data file.
+      - name: Run Meyerhof Analysis (CI Test)
+        run: |
+          # Ensure the data directory exists for the test run
+          mkdir -p data/
+          
+          # Execute main.py assuming the test input file is in data/
+          python src/main.py data/Geotech_InputData.xlsx
+
+      # 5. VERIFY OUTPUT ARTIFACTS
+      # Verify that the script successfully created the output folder.
+      - name: Verify Output Files
+        run: |
+          if [ -d "output" ]; then
+            echo "The 'output/' folder was generated successfully."
+          else
+            echo "Error: The 'output/' folder was not generated."
+            exit 1
+          fi

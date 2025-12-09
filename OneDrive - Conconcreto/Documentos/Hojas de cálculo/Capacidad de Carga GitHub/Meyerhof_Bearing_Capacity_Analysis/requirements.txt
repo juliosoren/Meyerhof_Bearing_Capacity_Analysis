@@ -1,0 +1,19 @@
+# requirements.txt
+# External dependencies required for the Meyerhof Bearing Capacity Calculation project.
+
+# Data analysis and manipulation
+pandas==2.2.2
+numpy==1.26.4
+
+# Scientific functions (used for stats, advanced math, etc.)
+scipy==1.13.1
+
+# Chart generation and visualization
+matplotlib==3.9.2
+seaborn==0.13.2
+
+# Excel file reader/writer engine (crucial for openpyxl imports)
+openpyxl==3.1.5
+
+
+

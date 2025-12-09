@@ -1,0 +1,36 @@
+# .gitignore
+
+# ----------------------------------
+# 1. Python Environment, Cache, and Build Artifacts
+# ----------------------------------
+# Ignore virtual environment folders
+venv/
+env/
+.conda/
+# Ignore cache and compiled files
+__pycache__/
+*.pyc
+*.pyd
+*.so
+.mypy_cache/
+.pytest_cache/
+
+# ----------------------------------
+# 2. Project Generated Output Files
+# CRITICAL: Do not upload generated analysis results
+# ----------------------------------
+# Output folder defined in the project:
+output/
+
+# Specific output files (in case they are outside the output folder)
+Results_Bearing_Capacity.xlsx
+Charts_bearing_capacity.xlsx
+
+# ----------------------------------
+# 3. IDEs and Temporary Files
+# ----------------------------------
+# Ignore VS Code settings folder
+.vscode/
+# Ignore temporary MS Office files (e.g., when the file is open)
+~$*.xls*
+~$*.docx
