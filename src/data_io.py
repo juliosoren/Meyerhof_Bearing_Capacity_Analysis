@@ -226,60 +226,47 @@ def export_dataframe_to_excel(results, output_dir, file_name, header_title):
 
 def export_charts_to_excel(figures_dict, output_dir, excel_filename):
     """
-    Exports a dictionary of Matplotlib figures to a single Excel file.
-
-    Each key in the dictionary is used as the sheet name, and the figure 
-    is inserted into cell A1. It can append to an existing file if present.
+    Exports a dictionary of Matplotlib figures to a single Excel file,
+    inserting them into the Excel file previously created by the data export function.
 
     Args:
         figures_dict (dict): A dictionary where keys are sheet names (str) 
                              and values are Matplotlib Figure objects (plt.Figure).
-        output_dir (str): The destination folder path.
+        output_dir (str): The destination folder path (e.g., 'output').
         excel_filename (str): The name of the Excel file (e.g., 'Results.xlsx').
     """
     excel_path = os.path.join(output_dir, excel_filename)
 
     try:
-        # Try to load the Excel workbook if it exists
-        try:
-            workbook_excel = load_workbook(excel_path)
-            file_exists = True
-        except FileNotFoundError:
-            workbook_excel = None
-            file_exists = False
+        # 1. Load the existing Excel file using openpyxl (it must exist for this function to run)
+        workbook_excel = load_workbook(excel_path)
 
-        # Save images to the file
-        with pd.ExcelWriter(excel_path, engine='openpyxl', mode='a' if file_exists else 'w') as writer:
-            if file_exists:
-                writer._book = workbook_excel  # Associate the existing file
+        for sheet_name, figure in figures_dict.items():
+            # 2. Get the sheet or create it if it doesn't exist
+            if sheet_name in workbook_excel.sheetnames:
+                excel_sheet = workbook_excel[sheet_name]
+            else:
+                # Create the sheet
+                excel_sheet = workbook_excel.create_sheet(sheet_name) 
 
-            for sheet_name, figure in figures_dict.items():
-                # Create a buffer to save the image (in-memory)
-                buffer = io.BytesIO()
-                figure.savefig(buffer, format='png', bbox_inches='tight')
-                buffer.seek(0)
+            # 3. Create an in-memory buffer and save the Matplotlib figure
+            buffer = io.BytesIO()
+            figure.savefig(buffer, format='png', bbox_inches='tight')
+            buffer.seek(0)
+            plt.close(figure) # Close the Matplotlib figure to free memory
+            
+            # 4. Create an Openpyxl Image object and add it to the sheet
+            img = Image(buffer)
+            excel_sheet.add_image(img, 'A1')
 
-                # Close the figure to prevent it from displaying
-                plt.close(figure)
-
-                # Create an Openpyxl image object
-                img = Image(buffer)
-
-                # Add the image to the sheet (creating the sheet if it doesn't exist)
-                if file_exists and sheet_name in workbook_excel.sheetnames:
-                    excel_sheet = workbook_excel[sheet_name]
-                else:
-                    # Use writer's book to create a new sheet for appending
-                    excel_sheet = writer._book.create_sheet(sheet_name)
-
-                excel_sheet.add_image(img, 'A1')
-
-        # Save the file after modification
-        if workbook_excel:
-            workbook_excel.save(excel_path)
-
+        # 5. Save the workbook one single time, respecting the full path
+        workbook_excel.save(excel_path)
         print(f"✅ Charts successfully exported to '{excel_path}'")
 
+    except FileNotFoundError:
+        # This occurs if the data export function (the one that creates the file) hasn't run yet.
+        print(f"❌ Error: The file '{excel_path}' was not found. Ensure data export has created the file first.")
+        return 
     except Exception as e:
         print(f"❌ Error exporting Charts: '{e}'")
         
