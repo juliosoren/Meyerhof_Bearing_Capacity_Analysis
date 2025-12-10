@@ -55,16 +55,22 @@ The automated workflow performs:
 
 1️⃣ OPTION 1: Online Execution (Google Colab - Recommended)
 
-It does not require local installation of Python or libraries. This method is the simplest way to run the analysis.
+This project is configured for seamless execution in Google Colab, allowing you to upload your data directly from your local machine, run the analysis, and download the results automatically.
 
-1. **Download and Edit**: Download the example file $\text{Geotech\_InputData.xlsx}$ from the $\text{data/}$ folder and modify it with your own data.
+* **Prepare Data and Open Notebook**:
+  * Download and Edit: Download the example input file `Geotech_InputData.xlsx` and the execution file `Run_Meyerhof_Bearing_Capacity.ipynb` rom the $\text{data/}$ folder. Modify the `Geotech_InputData.xlsx` file with your own data.
+  * Open the Notebook: Upload and open the `Run_Meyerhof_Bearing_Capacity.ipynb` file directly in Google Colab.
 
-2. **Open the Notebook**: Click the following link to open the execution environment: [Open the Execution Notebook in Colab].
+* **Run the Analysis (3 Steps in Colab)**:  
+  The Colab notebook is split into three executable cells:  
+  |Step|Action|Description|
+  | :--- | :--- | :--- |
+  |1| Initialization|Runs the initial setup and defines project variables.|
+  |2|Interactive Upload (User Action)|CRITICAL: Click the "Choose Files" button that appears and upload your modified `Geotech_InputData.xlsx` file from your computer.|
+  |3|Execute and Download|Automatically performs the following sequence: clones the repository, installs dependencies, runs the main analysis script using your uploaded data, and initiates the download of the final Excel reports to your machine.|
 
-3. **Run Cells**: Follow the Notebook instructions to mount your Google Drive (where you saved the modified Excel file) and run the analysis, specifying the file path.
-
-4. This project is configured for local execution via command line and for continuous automation via GitHub Actions.
-
+* **Development & Automation**: This project is configured for local execution via command line and for continuous automation via GitHub Actions.
+  
 
 
 2️⃣ OPTION 2: Local Execution
