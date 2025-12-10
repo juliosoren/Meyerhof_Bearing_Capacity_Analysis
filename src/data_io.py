@@ -284,12 +284,12 @@ def export_multiple_dataframes(df_1, df_2, output_dir, excel_filename,
     Args:
         df_1 (pd.DataFrame): The first DataFrame to export (e.g., capacity results).
         df_2 (pd.DataFrame): The second DataFrame to export (e.g., settlement check results).
-        output_dir (str): The destination folder path (e.g., 'output'). <--- ¡NUEVO!
-        excel_filename (str): The base name of the Excel file (e.g., 'Results'). <--- ¡NUEVO!
-        sheet_name_1 (str): Name for the first sheet. <--- ¡NUEVO!
-        sheet_title_1 (str): Title for the first sheet. <--- ¡NUEVO!
-        sheet_name_2 (str): Name for the second sheet. <--- ¡NUEVO!
-        sheet_title_2 (str): Title for the second sheet. <--- ¡NUEVO!
+        output_dir (str): The destination folder path (e.g., 'output'). 
+        excel_filename (str): The base name of the Excel file (e.g., 'Results').
+        sheet_name_1 (str): Name for the first sheet.
+        sheet_title_1 (str): Title for the first sheet. 
+        sheet_name_2 (str): Name for the second sheet. 
+        sheet_title_2 (str): Title for the second sheet.
     """
     
     # 1. Crear el directorio si no existe (usando el argumento output_dir)

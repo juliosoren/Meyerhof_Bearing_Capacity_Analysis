@@ -41,6 +41,10 @@ from plotting import (
 # =================================================================================
 
 OUTPUT_DIR = 'output'
+SHEET_NAME_1 = "Capacity_Charts"
+SHEET_TITLE_1 = "Surface Bearing Capacity Results"
+SHEET_NAME_2 = "settlement_check"
+SHEET_TITLE_2 = "Settlement Check Results"
 
 # This ensures that the 'output' folder is created if it does not exist,
 # preventing the CI error when attempting to save results.
@@ -144,8 +148,12 @@ def run_geotechnical_analysis(input_excel_path: str):
     export_multiple_dataframes(
         df_1=df_capacity_table,
         df_2=df_footing_results,
-        output_dir=output_filename, # Aquí se usará el valor 'output'
-        excel_filename=output_filename # Usar el nombre del archivo, ej: 'Results.xlsx'
+        output_dir=OUTPUT_DIR, 
+        excel_filename=output_filename, 
+        sheet_name_1=SHEET_NAME_1,     
+        sheet_title_1=SHEET_TITLE_1,   
+        sheet_name_2=SHEET_NAME_2,      
+        sheet_title_2=SHEET_TITLE_2     
     )
     print(f"💾 Tables exported to '{output_filename}.xlsx'.")
 
