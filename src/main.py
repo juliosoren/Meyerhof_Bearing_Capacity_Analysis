@@ -41,10 +41,16 @@ from plotting import (
 # =================================================================================
 
 OUTPUT_DIR = 'output'
+
+# Sheet configuration for Results file (DataFrames)
 SHEET_NAME_1 = "Capacity_Charts"
 SHEET_TITLE_1 = "Surface Bearing Capacity Results"
-SHEET_NAME_2 = "settlement_check"
-SHEET_TITLE_2 = "Settlement Check Results"
+SHEET_NAME_2 = "bearing_capacity_check"
+SHEET_TITLE_2 = "Bearing Capacity Check"
+
+# File names for separate outputs
+RESULTS_FILENAME = "Results_Bearing_Capacity"  # Tables/DataFrames
+CHARTS_FILENAME = "Charts_bearing_capacity"    # Matplotlib plots
 
 # This ensures that the 'output' folder is created if it does not exist,
 # preventing the CI error when attempting to save results.
@@ -84,10 +90,6 @@ def run_geotechnical_analysis(input_excel_path: str):
     Teta = geotech_data['Theta'] # Load Inclination
     Norma = geotech_data['code'] # Design Code
     epsilon = geotech_data['epsilon']
-    
-    output_filename = geotech_data['output_filename']
-    chart_dir = geotech_data['chart_dir']
-    chart_filename = geotech_data['chart_filename']
 
     df_footing_config = load_footing_configuration(sheet_conf)
     
@@ -127,7 +129,6 @@ def run_geotechnical_analysis(input_excel_path: str):
     print("✅ Structural check completed.")
 
     # Generation of the capacity chart table (results)
-    # The variable 'epsilon' is added to the call, as it was in your 'abacos' function
     df_capacity_table = generate_capacity_table(
         df_geotech=df_geotech, 
         Df_values=Df_values,
@@ -141,37 +142,42 @@ def run_geotechnical_analysis(input_excel_path: str):
     print("✅ Capacity chart table (combinations) generated.")
 
     # -----------------------------------------------------------------------------
-    # E. DATAFRAME EXPORT
+    # E. DATAFRAME EXPORT TO RESULTS FILE
     # -----------------------------------------------------------------------------
     
-    # Export results (charts + structural check) to a single Excel file
+    # Export DataFrames to Results_Bearing_Capacity.xlsx
     export_multiple_dataframes(
         df_1=df_capacity_table,
         df_2=df_footing_results,
         output_dir=OUTPUT_DIR, 
-        excel_filename=output_filename, 
+        excel_filename=RESULTS_FILENAME,  # Results_Bearing_Capacity (without .xlsx)
         sheet_name_1=SHEET_NAME_1,     
         sheet_title_1=SHEET_TITLE_1,   
         sheet_name_2=SHEET_NAME_2,      
         sheet_title_2=SHEET_TITLE_2     
     )
-    print(f"💾 Tables exported to '{output_filename}.xlsx'.")
+    print(f"📊 DataFrames exported to: {OUTPUT_DIR}/{RESULTS_FILENAME}.xlsx\n")
 
     # -----------------------------------------------------------------------------
-    # F. PLOTTING AND EXPORT
+    # F. CHARTS EXPORT TO SEPARATE FILE
     # -----------------------------------------------------------------------------
-    # 1. Generate figures
+    
+    # 1. Generate Matplotlib figures
     dictionary_of_figures = generate_capacity_charts(df_capacity_table)
+    print(f"✅ Generated {len(dictionary_of_figures)} chart(s).")
 
-    # 2. Export figures
+    # 2. Export charts to Charts_bearing_capacity.xlsx (separate file)
     export_charts_to_excel(
         figures_dict=dictionary_of_figures, 
-        output_dir=chart_dir, 
-        excel_filename=chart_filename
+        output_dir=OUTPUT_DIR, 
+        excel_filename=CHARTS_FILENAME  # Charts_bearing_capacity (without .xlsx)
     )
-    print(f"💾 Charts exported to '{chart_filename}'.")
+    print(f"📈 Charts exported to: {OUTPUT_DIR}/{CHARTS_FILENAME}.xlsx\n")
     
-    print("\n✨ Workflow completed successfully. ✨")
+    print("✨ Workflow completed successfully. ✨")
+    print(f"📁 Output files:")
+    print(f"   1. {OUTPUT_DIR}/{RESULTS_FILENAME}.xlsx  (DataFrames)")
+    print(f"   2. {OUTPUT_DIR}/{CHARTS_FILENAME}.xlsx   (Charts)")
 
 
 # =================================================================================
@@ -184,8 +190,8 @@ if __name__ == "__main__":
         input_file_path = sys.argv[1]
         run_geotechnical_analysis(input_file_path)
     else:
-        # If a path is not provided, use the default value from your function
+        # If a path is not provided, use the default value
         default_path = "Geotech_InputData.xlsx" 
-        print("⚠️ No file path provided. Attempting to load the default file:")
-        print(f"Command: python app.py {default_path}")
+        print("⚠️  No file path provided. Attempting to load the default file:")
+        print(f"   Command: python app.py {default_path}\n")
         run_geotechnical_analysis(default_path)

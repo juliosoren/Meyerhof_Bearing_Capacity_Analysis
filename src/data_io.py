@@ -15,6 +15,9 @@ from openpyxl.drawing.image import Image
 # Visualization Libraries
 import matplotlib.pyplot as plt 
 import matplotlib.font_manager as font_manager
+from openpyxl import load_workbook, Workbook
+
+
 
 "==================================================================================================="
 
@@ -140,7 +143,7 @@ def read_column_vector(sheet: openpyxl.worksheet.worksheet.Worksheet,
 
 "==================================================================================================="
 
-def export_dataframe_to_excel(results, output_dir, file_name, header_title):
+def export_dataframe_to_excel(results, OUTPUT_DIR, file_name, header_title):
     """
     Exports a DataFrame to an Excel file with custom formatting applied.
 
@@ -149,7 +152,7 @@ def export_dataframe_to_excel(results, output_dir, file_name, header_title):
     
     Args:
         results (pd.DataFrame): The DataFrame containing the results to export.
-        output_dir (str): The destination folder path.
+        OUTPUT_DIR (str): The destination folder path.
         file_name (str): The base name of the output Excel file (without extension).
         header_title (str): The main title for the spreadsheet (placed in cell A1).
     """
@@ -158,10 +161,10 @@ def export_dataframe_to_excel(results, output_dir, file_name, header_title):
     # from openpyxl import load_workbook, ... 
     # import os, pandas as pd
 
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
 
-    excel_path = os.path.join(output_dir, f"{file_name}.xlsx")
+    excel_path = os.path.join(OUTPUT_DIR, f"{file_name}.xlsx")
 
     try:
         # Save to Excel, shifting data to start from row 4, without DataFrame header
@@ -226,53 +229,56 @@ def export_dataframe_to_excel(results, output_dir, file_name, header_title):
 
 def export_charts_to_excel(figures_dict, output_dir, excel_filename):
     """
-    Exports a dictionary of Matplotlib figures to a single Excel file,
-    inserting them into the Excel file previously created by the data export function.
+    Exports a dictionary of Matplotlib figures to a NEW Excel file.
+    Each figure is inserted into its own sheet.
 
     Args:
         figures_dict (dict): A dictionary where keys are sheet names (str) 
                              and values are Matplotlib Figure objects (plt.Figure).
         output_dir (str): The destination folder path (e.g., 'output').
-        excel_filename (str): The name of the Excel file (e.g., 'Results.xlsx').
+        excel_filename (str): The name of the Excel file WITHOUT extension (e.g., 'Charts_bearing_capacity').
     """
-    # Construye la ruta completa: "output/NombreDelArchivo.xlsx"
-    excel_path = os.path.join(output_dir, excel_filename)
+    # 0. Build the complete path with .xlsx extension
+    excel_path = os.path.join(output_dir, f"{excel_filename}.xlsx")
 
     try:
-        # 1. Cargar el archivo Excel existente.
-        # Esto fallará si la función de exportación de datos no ha creado el archivo primero.
-        workbook_excel = load_workbook(excel_path)
+        # 1. Create a NEW Excel workbook using openpyxl
+        workbook_excel = Workbook()
+        
+        # 2. Remove the default sheet created by openpyxl
+        if "Sheet" in workbook_excel.sheetnames:
+            default_sheet = workbook_excel["Sheet"]
+            workbook_excel.remove(default_sheet)
 
+        # 3. Process each figure in the dictionary
         for sheet_name, figure in figures_dict.items():
-            # 2. Obtener la hoja si existe, o crearla
-            if sheet_name in workbook_excel.sheetnames:
-                excel_sheet = workbook_excel[sheet_name]
-            else:
-                excel_sheet = workbook_excel.create_sheet(sheet_name) 
-
-            # 3. Crear buffer en memoria para la imagen
-            buffer = io.BytesIO()
-            figure.savefig(buffer, format='png', bbox_inches='tight')
-            buffer.seek(0)
-            plt.close(figure) # Cierra la figura para liberar recursos
+            # Create a new sheet for this chart
+            excel_sheet = workbook_excel.create_sheet(sheet_name)
             
-            # 4. Insertar la imagen en la hoja
+            # Create an in-memory buffer and save the Matplotlib figure as PNG
+            buffer = io.BytesIO()
+            figure.savefig(buffer, format='png', bbox_inches='tight', dpi=150)
+            buffer.seek(0)
+            plt.close(figure)  # Close the Matplotlib figure to free resources
+            
+            # Create an Openpyxl Image object and insert it into the sheet at A1
             img = Image(buffer)
             excel_sheet.add_image(img, 'A1')
+            
+            # Optional: Adjust column width for better visualization
+            excel_sheet.column_dimensions['A'].width = 100
 
-        # 5. Guardar el archivo una única vez al final, usando la ruta completa
+        # 4. Save the new workbook
         workbook_excel.save(excel_path)
+        workbook_excel.close()
         print(f"✅ Charts successfully exported to '{excel_path}'")
 
-    except FileNotFoundError:
-        # Mensaje de error clave para la depuración
-        print(f"❌ Error: The file '{excel_path}' was not found. Ensure data export has created the file first.")
-        return 
     except Exception as e:
         print(f"❌ Error exporting Charts: '{e}'")
+        import traceback
+        traceback.print_exc()  # Print detailed error for debugging
         
 "==================================================================================================="
-
 
 def export_multiple_dataframes(df_1, df_2, output_dir, excel_filename, 
                                sheet_name_1, sheet_title_1, 
@@ -285,18 +291,18 @@ def export_multiple_dataframes(df_1, df_2, output_dir, excel_filename,
         df_1 (pd.DataFrame): The first DataFrame to export (e.g., capacity results).
         df_2 (pd.DataFrame): The second DataFrame to export (e.g., settlement check results).
         output_dir (str): The destination folder path (e.g., 'output'). 
-        excel_filename (str): The base name of the Excel file (e.g., 'Results').
+        excel_filename (str): The base name WITHOUT extension (e.g., 'Results_Bearing_Capacity').
         sheet_name_1 (str): Name for the first sheet.
         sheet_title_1 (str): Title for the first sheet. 
         sheet_name_2 (str): Name for the second sheet. 
         sheet_title_2 (str): Title for the second sheet.
     """
     
-    # 1. Crear el directorio si no existe (usando el argumento output_dir)
+    # 1. Create the directory if it doesn't exist
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    # 2. Construir la ruta completa
+    # 2. Build the complete path with .xlsx extension
     excel_path = os.path.join(output_dir, f"{excel_filename}.xlsx")
 
     try:
@@ -305,12 +311,11 @@ def export_multiple_dataframes(df_1, df_2, output_dir, excel_filename,
             df_1.to_excel(writer, sheet_name=sheet_name_1, startrow=3, index=False, header=False)
             df_2.to_excel(writer, sheet_name=sheet_name_2, startrow=3, index=False, header=False)
 
-        # Cargar el libro de trabajo para aplicar el formato
+        # Load the workbook to apply formatting
         wb = load_workbook(excel_path)
 
         # Internal function to apply all formatting logic to a specific sheet
-        def apply_format(ws, df, title, sheet_name): # Añadimos sheet_name como argumento
-            # NOTA: ws = wb[sheet_name] ya está implícito en la lógica de abajo
+        def apply_format(ws, df, title, sheet_name):
             
             last_column = ws.max_column
             last_row = ws.max_row
@@ -347,7 +352,7 @@ def export_multiple_dataframes(df_1, df_2, output_dir, excel_filename,
                     if isinstance(cell.value, (int, float)):
                         cell.number_format = "0.00"
 
-        # Apply formatting to both sheets (using arguments instead of global variables)
+        # Apply formatting to both sheets
         apply_format(wb[sheet_name_1], df_1, sheet_title_1, sheet_name_1)
         apply_format(wb[sheet_name_2], df_2, sheet_title_2, sheet_name_2)
 
